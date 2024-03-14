@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archetype-Quiz</title>
+</head>
+<body>
+    <div class="quiz-wrapper flex"></div>
+
+    <script>
+        const questions = [
+            {
+                question: "In your current phase of life, which of these skills is most important to you?",
+                options:{
+                    answer1: "Leadership",
+                    answer2: "Discipline",
+                    answer3: "Knowledge",
+                    answer4: "Creativity",
+                }
+            },
+            {
+                question: "From these options, what kind of person would you prefer to be?",
+                options:{
+                    answer1: "A person who is wise, who people look up to, and desire to lead them",
+                    answer2: "A person who knows how to focus his mind and his body to get the job done",
+                    answer3: "A person who is knowledgeable and the master of his craft",
+                    answer4: "A person who possesses keen sensory awareness and is one with God",
+                }
+            },
+            {
+                question: "What is a skill you struggle with right now?",
+                options:{
+                    answer1: "Generosity",
+                    answer2: "Routine",
+                    answer3: "Mastery",
+                    answer4: "Relationships",
+                }
+            },
+            {
+                question: "Out of the historical figures below, who do you feel the strongest connection with?",
+                options:{
+                    answer1: "Marcus Aurelius",
+                    answer2: "Alexander the Great",
+                    answer3: "Albert Einstein",
+                    answer4: "Shakespeare",
+                }
+            },
+            {
+                question: "Which quality do you think society needs most?",
+                options:{
+                    answer1: "Accountability",
+                    answer2: "Loyalty",
+                    answer3: "Introspection",
+                    answer4: "Purpose",
+                }
+            },
+            {
+                question: "Which quote do you like best?",
+                options:{
+                    answer1: "“I have often wondered how it is that every man loves himself more than all the rest of men, but yet sets less value on his own opinion of himself than on the opinion of others.”",
+                    answer2: "“Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.”",
+                    answer3: "“I've always wanted to own and control the primary technology in everything we do.”",
+                    answer4: "“Be the flame, not the moth.”",
+                }
+            },
+            {
+                question: "If you were stranded on an island with a group of people, which role would you instinctively take?",
+                options:{
+                    answer1: "I’d set aside my ego and take the lead for the greater good of the group",
+                    answer2: "I’d make sure there is shelter and food",
+                    answer3: "I’d think of ways to be rescued or leave the island onto safety",
+                    answer4: "I’d ensure there is group harmony for survival",
+                }
+            },
+            {
+                question: "You’ve decided to trek the mountains of California for 2 weeks, what is the purpose of your journey?",
+                options:{
+                    answer1: "To grow as a man by testing my own self leadership and return with a greater ability to lead, protect, and provide",
+                    answer2: "To put myself in a hostile environment so I can build discipline, willpower, and grit",
+                    answer3: "To look for, discover, and research medicinal mushrooms and plants",
+                    answer4: "To connect to nature, get away from the hustle and bustle of society, and be in complete presence",
+                }
+            }
+        ];
+        
+        const results = [
+            {
+                Archetype: "King",
+                pts: 0
+            },
+            {
+                Archetype: "Warrior",
+                pts: 0
+            },
+            {
+                Archetype: "Magician",
+                pts: 0
+            },
+            {
+                Archetype: "Lover",
+                pts: 0
+            },
+        ]
+
+        // Variable to keep track of current question index
+        let currentQuestionIndex = 0;
+
+        const quiz_wrapper = document.querySelector(".quiz-wrapper")
+
+        // Function to show/hide questions based on current index
+        function showQuestion(index) {
+            const questionsWrapper = document.querySelectorAll('.question-wrapper');
+            questionsWrapper.forEach((questionWrapper, i) => {
+                questionWrapper.style.display = i === index ? 'block' : 'none';
+            });
+        }
+
+        // Function to handle "Next" button click
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                let selectedOption = document.querySelector(".selected-option");
+
+                if (selectedOption !== null) {
+                    if(currentQuestionIndex === questions.length-2){
+                        const finalNextBtnList = document.querySelectorAll('.next');
+                        const finalNextBtn = finalNextBtnList[finalNextBtnList.length - 1];
+                        finalNextBtn.textContent = 'View Results';
+                        finalNextBtn.removeEventListener('click', nextQuestion);
+                        finalNextBtn.addEventListener('click', viewResults);
+                    }
+                    addPts();
+                    if(selectedOption !== null){
+                        selectedOption.classList.add("prev-answer")
+                        selectedOption.classList.remove("selected-option");
+                    }else{
+
+                    }
+                    currentQuestionIndex++;
+                    showQuestion(currentQuestionIndex); 
+                }
+            }
+        }
+
+
+        // Function to handle "Previous" button click
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+                const allQuestions = document.querySelectorAll(".question-wrapper")
+                const currentQuestion = allQuestions[currentQuestionIndex]
+                let prevAnswer = currentQuestion.querySelector(".prev-answer")
+
+                const classNamesArray = Array.from(prevAnswer.classList);
+                const optionIndex = parseInt(classNamesArray[1].match(/\d+/)[0]);
+                results[optionIndex - 1].pts--;
+
+                prevAnswer.classList.remove("prev-answer")
+                prevAnswer.classList.add("selected-option")
+            }
+        }
+
+        function addPts() {
+            let selectedOption = document.querySelector(".selected-option"); // Select within the current question wrapper
+            if (selectedOption) { // Check if an option is selected
+                const classNamesArray = Array.from(selectedOption.classList);
+                const optionIndex = parseInt(classNamesArray[1].match(/\d+/)[0]);
+                results[optionIndex - 1].pts++;
+            }
+        }
+
+
+        function viewResults() {
+            const selectedOption = document.querySelector(".selected-option")
+            if (selectedOption !== null) {
+                addPts();
+                quiz_wrapper.style.display = "none"
+                // Find the archetype with the most points
+                let maxPts = -1;
+                let winningArchetype = "";
+
+                results.forEach(result => {
+                    if (result.pts > maxPts) {
+                        maxPts = result.pts;
+                        winningArchetype = result.Archetype;
+                    }
+                });
+
+                const resultDiv = document.getElementById( `${winningArchetype}`);
+                const emailWrapper = document.querySelector('.email-wrapper')
+                emailWrapper.style.display = 'block';
+                const promoSection = document.querySelector(".promo-section");
+
+                const skipLink = document.querySelector(".skip-link");
+                skipLink.addEventListener("click", () =>{
+                    emailWrapper.style.display = "none";
+                    resultDiv.style.display = "flex";
+                    promoSection.style.display = "block";
+                });
+
+                const formSubmitBtn = document.querySelector(".quiz-email-btn");
+                formSubmitBtn.addEventListener("click", () =>{
+                    emailWrapper.style.display = "none";
+                    resultDiv.style.display = "flex";
+                    promoSection.style.display = "block";
+                });
+            }
+        }
+
+
+        questions.forEach((question, index) => {
+            const questionWrapper = document.createElement('div');
+            questionWrapper.classList.add('question-wrapper');
+            questionWrapper.style.display = index === 0 ? 'block' : 'none';
+
+            // Create question step wrapper
+            const questionStepWrapper = document.createElement('div');
+            questionStepWrapper.classList.add('question-step-wrapper', 'flex');
+            const currStep = document.createElement('p');
+            currStep.classList.add('curr-step');
+            currStep.textContent = index + 1;
+            const questionCount = document.createElement('p');
+            questionCount.classList.add('question-count');
+            questionCount.textContent = questions.length;
+            questionStepWrapper.appendChild(currStep);
+            questionStepWrapper.appendChild(document.createTextNode('/'));
+            questionStepWrapper.appendChild(questionCount);
+            
+            // Create progress bar wrapper
+            const progressBarWrapper = document.createElement('div');
+            progressBarWrapper.classList.add('progress-bar-wrapper');
+            const progressBar = document.createElement('div');
+            progressBar.classList.add('progress-bar');
+            progressBar.style.width = `${(index+1)*12.5}%`;
+            progressBarWrapper.appendChild(progressBar);
+
+            // Create question
+            const questionElement = document.createElement('p');
+            questionElement.classList.add('question');
+            questionElement.textContent = question.question;
+
+            // Create options wrapper and options
+            const optionsWrapper = document.createElement('form');
+            optionsWrapper.classList.add('options-wrapper', 'grid');
+
+            let answerIndex = 1;
+            for (const key in question.options) {
+                    const option_container = document.createElement("div")
+                    option_container.classList.add("option_container")
+                    const label = document.createElement('label');
+                    label.classList.add("option-txt")
+                    label.setAttribute('for', key);
+                    label.textContent = question.options[key];
+                    const input = document.createElement('input');
+                    input.classList.add("option", `option${answerIndex}`)
+                    input.setAttribute('type', 'radio');
+                    input.setAttribute('id', key);
+                    input.setAttribute('name', `question${index}`);
+                    option_container.appendChild(label);
+                    option_container.appendChild(input);
+                    optionsWrapper.appendChild(option_container)
+                    answerIndex++
+                }
+
+                // Create buttons wrapper and buttons
+                const buttonsWrapper = document.createElement('div');
+                buttonsWrapper.classList.add('buttons-wrapper', 'flex');
+                const prevButton = document.createElement('button');
+                prevButton.classList.add('prev');
+                prevButton.textContent = 'Previous';
+                prevButton.addEventListener("click", prevQuestion)
+
+                const nextButton = document.createElement('button');
+                nextButton.classList.add('next');
+                nextButton.textContent = 'Next';
+                nextButton.addEventListener("click", nextQuestion)
+
+                buttonsWrapper.appendChild(prevButton);
+                buttonsWrapper.appendChild(nextButton);
+
+                // Append elements to question wrapper
+                questionWrapper.appendChild(questionStepWrapper);
+                questionWrapper.appendChild(progressBarWrapper);
+                questionWrapper.appendChild(questionElement);
+                questionWrapper.appendChild(optionsWrapper);
+                questionWrapper.appendChild(buttonsWrapper);
+
+                // Append question wrapper to parent element (e.g., body)
+                quiz_wrapper.appendChild(questionWrapper)
+
+                let optionBtns;
+                let currentQuestion = document.querySelectorAll(".question-wrapper")[index]; // Select the current question wrapper
+                for(let i=1; i<answerIndex+1; i++){
+                    optionBtns = currentQuestion.querySelectorAll(`.option${i}`); 
+                    optionBtns.forEach(btn => {
+                        let answersInCurrQuestion; 
+                        btn.addEventListener("click", (e)=>{
+                            answersInCurrQuestion = currentQuestion.querySelectorAll(".option"); // Select options relative to the current question wrapper
+                            answersInCurrQuestion.forEach(answer => {
+                                answer.classList.remove("selected-option");
+                            });
+                            btn.classList.add("selected-option");
+                        });
+                    });
+                }
+            }
+        )
+    </script>
+
+<style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+  
+    .flex{
+      display: flex;
+    }
+  
+    .grid{
+      display: grid;
+    }
+  
+    p{
+      font-size: 14px;
+    }
+  
+    .quiz-wrapper{
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+      flex-direction: column;
+    }
+  
+    .question-wrapper{
+      margin-top: 20px;
+      width: 100%;
+    }
+  
+    .progress-bar-wrapper{
+      width: 100%;
+      height: 5px;
+      background-color: #B6C4B6;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+  
+    .progress-bar{
+      width: 10%;
+      height: 100%;
+      background-color: #163020;
+    }
+  
+    .options-wrapper{
+      margin: 20px 0;
+      grid-template-columns: repeat(4, 180px);
+      grid-template-rows: 300px;
+      gap: 30px;
+      max-width: 100%;
+    }
+  
+    .option_container{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+      width: 100%;
+      position: relative;
+      margin-left: 10px;
+      margin-right: 10px;
+      padding: 30px;
+      background-color: rgba(238, 240, 229);
+    }
+  
+    .option_container:hover{
+      background-color: rgba(237, 247, 196, 0.37);
+      cursor: pointer;
+    }
+  
+    .option{
+      -webkit-appearance: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      border: 1px solid rgba(0, 0, 0, 0.306);
+    }
+  
+    .selected-option,
+    .prev-answer{
+      background-color: rgba(201, 243, 211, 0.37);
+    }
+  
+    .option-txt{
+      text-transform: none;
+      font-weight: 400;
+    }
+  
+    .buttons-wrapper{
+      margin-left: auto;
+      gap: 15px;
+      width: 100%;
+      justify-content: end;
+    }
+  
+    button{
+      font-weight: 700;
+      padding: 6px 12px;
+      border: none;
+    }
+  
+    .next{
+      color: white;
+      background-color: #163020;
+    }
+  
+    .prev{
+      color: black;
+      background-color: #EEF0E5;
+    }
+  
+    /*Tablet*/
+    @media (max-width: 770px) {
+    .quiz-wrapper{
+        width: 70%;
+    }
+      .options-wrapper{
+        grid-template-columns: repeat(2, 180px);
+        grid-template-rows: repeat(2, 300px);
+      }            
+      .buttons-wrapper{
+        justify-content: center;
+      }
+    }
+  
+    /*mobile portrait*/
+    @media (max-width: 600px) {
+        .quiz-wrapper{
+            width: 70%;
+        }
+      .options-wrapper{
+        grid-template-columns: repeat(1, 180px);
+        grid-template-rows: repeat(2, 300px);
+      }            
+      .buttons-wrapper{
+        justify-content: center;
+      }
+    }
+  </style>
+</body>
+
